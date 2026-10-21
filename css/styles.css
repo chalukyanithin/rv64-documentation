@@ -758,6 +758,97 @@ body {
   color: #8E2B1E;
 }
 
+/* Document Figures & Extracted Diagrams */
+.doc-figure {
+  margin: 2.2rem 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background-color: var(--surface-card);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-medium);
+  transition: var(--transition);
+}
+
+.doc-figure:hover {
+  box-shadow: var(--shadow-float);
+  border-color: var(--accent-border);
+}
+
+.doc-image-frame {
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--surface-cream);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
+.doc-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+  display: block;
+  cursor: zoom-in;
+  transition: transform 0.25s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.doc-image:hover {
+  transform: scale(1.015);
+}
+
+.doc-image-caption {
+  padding: 0.85rem 1.25rem;
+  background-color: var(--surface-card);
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+/* Math Block */
+.math-block {
+  margin: 1.4rem 0;
+  padding: 0.9rem 1.4rem;
+  background: var(--surface-cream);
+  border-left: 3px solid var(--skin-500);
+  border-radius: var(--radius-sm);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.92rem;
+  color: var(--skin-900);
+  overflow-x: auto;
+}
+
+[data-theme="dark"] .math-block {
+  color: var(--skin-200);
+}
+
+.checklist-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid var(--skin-400);
+  margin-right: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.checklist-badge.checked {
+  background-color: var(--accent-terracotta);
+  border-color: var(--accent-terracotta);
+  color: #FFFDF9;
+  font-weight: 700;
+}
+
 /* Next / Prev Document Navigation Links */
 .doc-footer-nav {
   display: flex;

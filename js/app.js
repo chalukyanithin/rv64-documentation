@@ -77,7 +77,7 @@
   const toast = document.getElementById("app-toast");
   const sidebarFilter = document.getElementById("sidebar-filter");
 
-  let currentDocId = "overview";
+  let currentDocId = "architecture";
 
   // Show Toast
   function showToast(message) {
@@ -162,11 +162,28 @@
     html = html.replace(/(<li>.*<\/li>)/gms, '<ul>$1</ul>');
     html = html.replace(/<\/ul>\s*<ul>/g, '');
 
+    // Images: ![alt](url)
+    html = html.replace(/!\[(.*?)\]\((.*?)\)/g, function (match, alt, src) {
+      return `
+        <figure class="doc-figure">
+          <div class="doc-image-frame">
+            <img src="${src}" alt="${escapeHtml(alt)}" class="doc-image" onclick="window.open('${src}', '_blank')">
+          </div>
+          ${alt ? `<figcaption class="doc-image-caption"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:4px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>${escapeHtml(alt)}</figcaption>` : ''}
+        </figure>
+      `;
+    });
+
+    // Math block: $$...$$
+    html = html.replace(/\$\$([\s\S]*?)\$\$/g, function (match, math) {
+      return `<div class="math-block"><code>${escapeHtml(math.trim())}</code></div>`;
+    });
+
     // Paragraphs
     html = html.split('\n\n').map(p => {
       const trimmed = p.trim();
       if (!trimmed) return "";
-      if (trimmed.startsWith('<h') || trimmed.startsWith('<div') || trimmed.startsWith('<table') || trimmed.startsWith('<ul') || trimmed.startsWith('<hr')) {
+      if (trimmed.startsWith('<h') || trimmed.startsWith('<div') || trimmed.startsWith('<table') || trimmed.startsWith('<ul') || trimmed.startsWith('<hr') || trimmed.startsWith('<figure')) {
         return trimmed;
       }
       return `<p>${parseInline(trimmed)}</p>`;
@@ -180,6 +197,8 @@
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\[x\]/gi, '<span class="checklist-badge checked">✓</span>')
+      .replace(/\[ \]/gi, '<span class="checklist-badge">○</span>')
       .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color:var(--accent-terracotta);font-weight:600;">$1</a>');
   }
 
@@ -619,7 +638,7 @@
     if (closeSearchBtn) closeSearchBtn.addEventListener("click", closeSearch);
 
     // Initial doc load
-    const initialHash = window.location.hash.replace("#", "") || "overview";
+    const initialHash = window.location.hash.replace("#", "") || "architecture";
     loadDoc(initialHash);
   }
 
