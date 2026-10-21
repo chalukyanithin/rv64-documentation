@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "npx serve -l 3000 .",
     "start": "npx serve -l 3000 .",
-    "build": "echo 'Static build ready - zero compilation required'",
     "deploy": "powershell -ExecutionPolicy Bypass -File ./scripts/sync_and_push.ps1",
     "import-pdf": "python ./scripts/import_pdf.py"
   },

@@ -1,5 +1,9 @@
 {
-  "version": 2,
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "outputDirectory": ".",
+  "installCommand": "echo 'No install dependencies required'",
+  "buildCommand": "echo 'Deploying static RV64 documentation'",
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [
