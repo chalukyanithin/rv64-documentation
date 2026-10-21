@@ -1,0 +1,22 @@
+{
+  "name": "rv64-documentation",
+  "version": "1.0.0",
+  "description": "Premium documentation website for RV64 RISC-V Project in warm beige, cream and skin tones",
+  "scripts": {
+    "dev": "npx serve -l 3000 .",
+    "start": "npx serve -l 3000 .",
+    "build": "echo 'Static build ready - zero compilation required'",
+    "deploy": "powershell -ExecutionPolicy Bypass -File ./scripts/sync_and_push.ps1",
+    "import-pdf": "python ./scripts/import_pdf.py"
+  },
+  "keywords": [
+    "riscv",
+    "rv64",
+    "documentation",
+    "emulator",
+    "c++20",
+    "sv39"
+  ],
+  "author": "chalukyanithin",
+  "license": "MIT"
+}

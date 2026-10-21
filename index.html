@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yantra · RV64 RISC-V Full-System Emulator Documentation</title>
+  <meta name="description" content="Technical documentation for Yantra: high-performance modern C++20 RISC-V 64-bit full-system emulator supporting Sv39 MMU, OpenSBI, and Linux 6.8.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+  
+  <!-- Modern Typography (Plus Jakarta Sans & JetBrains Mono) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- PDF.js for pure client-side PDF extraction (Zero backend needed) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    if (window.pdfjsLib) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+  </script>
+
+  <!-- Custom Styles in Beige, Cream and Skin Palette -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+  <!-- Top Reading Progress Indicator -->
+  <div id="reading-progress"></div>
+
+  <!-- Header Navigation -->
+  <header class="app-header">
+    <div class="brand-section">
+      <a href="#overview" class="brand-logo" title="RV64 Documentation Home">
+        <div class="logo-badge">64</div>
+        <div class="brand-title">
+          <span>Yantra</span>
+          <span style="font-weight: 400; color: var(--text-muted);">RV64</span>
+          <span class="brand-badge">RV64GC</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="header-actions">
+      <!-- Search Trigger -->
+      <button class="search-trigger" id="btn-open-search" title="Search documentation (Ctrl+K)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <span>Search documentation...</span>
+        <span class="kbd-shortcut">Ctrl K</span>
+      </button>
+
+      <!-- Import PDF Button -->
+      <button class="btn btn-primary" id="btn-open-pdf" title="Import specifications from PDF">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+        <span>Import PDF</span>
+      </button>
+
+      <!-- Theme Switcher -->
+      <button class="btn-icon" id="theme-toggle" title="Toggle warm light/dark mode">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+      </button>
+
+      <!-- GitHub Link -->
+      <a href="https://github.com/chalukyanithin/rv64-documentation" target="_blank" rel="noopener" class="btn-icon" title="View GitHub Repository">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- Application Layout -->
+  <div class="layout-wrapper">
+
+    <!-- Left Sidebar: Documentation Navigation -->
+    <aside class="app-sidebar">
+      <div class="sidebar-search-box">
+        <input type="text" id="sidebar-filter" class="sidebar-filter-input" placeholder="Filter articles...">
+      </div>
+      <nav id="sidebar-nav">
+        <!-- Rendered dynamically by app.js -->
+      </nav>
+    </aside>
+
+    <!-- Main Content: Article Area -->
+    <main class="main-content">
+      <article class="doc-article">
+        <!-- Breadcrumbs -->
+        <nav class="doc-breadcrumbs">
+          <a href="#overview">Docs</a>
+          <span>/</span>
+          <span id="breadcrumb-category">Getting Started</span>
+          <span>/</span>
+          <span id="breadcrumb-title" style="color:var(--text-main);font-weight:600;">Project Overview</span>
+        </nav>
+
+        <!-- Markdown Body -->
+        <div id="doc-body" class="markdown-body">
+          <!-- Rendered dynamically by app.js -->
+        </div>
+      </article>
+    </main>
+
+    <!-- Right Sidebar: Table of Contents & Register Inspector -->
+    <aside class="app-toc">
+      <!-- Table of Contents -->
+      <div>
+        <div class="toc-title">On This Page</div>
+        <ul id="toc-list" class="toc-list">
+          <!-- Dynamic TOC -->
+        </ul>
+      </div>
+
+      <!-- Interactive RV64 Register Inspector -->
+      <div class="inspector-card">
+        <div class="inspector-header">
+          <span class="inspector-title">Register Inspector</span>
+          <span style="font-size:0.7rem;color:var(--skin-600);font-weight:700;">RV64G</span>
+        </div>
+        <select id="reg-select" class="reg-select" title="Select a register to inspect"></select>
+        <div id="reg-detail" class="reg-detail">
+          <!-- Dynamic register info -->
+        </div>
+      </div>
+
+      <!-- Zero-Config Vercel Deploy Widget -->
+      <div class="inspector-card" style="background-color: var(--surface-card);">
+        <div class="inspector-header">
+          <span class="inspector-title">Deployment Status</span>
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background-color:#48BB78;" title="Ready"></span>
+        </div>
+        <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.75rem;">
+          Pure static frontend with zero backend dependencies. 100% ready for instant Vercel pulls.
+        </p>
+        <button class="btn btn-secondary" style="width:100%;font-size:0.78rem;justify-content:center;" onclick="window.appShowToast('Run: npm run deploy in terminal to push to Git!')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>
+          Push to Vercel
+        </button>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- PDF Importer Modal -->
+  <div class="modal-backdrop" id="pdf-modal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Import PDF to Documentation</h3>
+        <button class="btn-icon" id="btn-close-pdf" style="width:32px;height:32px;">✕</button>
+      </div>
+      <div class="modal-body">
+        <!-- Dropzone -->
+        <div class="dropzone" id="pdf-dropzone">
+          <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <div class="dropzone-text">Click or drag & drop your PDF file here</div>
+          <div class="dropzone-subtext">Parses technical specifications, chapters, and assembly code into clean Markdown</div>
+          <input type="file" id="pdf-file-input" accept="application/pdf" style="display:none;">
+        </div>
+
+        <!-- Meta Inputs -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.25rem 0 0.75rem;">
+          <div>
+            <label style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:0.35rem;">Document Title</label>
+            <input type="text" id="pdf-doc-title" class="sidebar-filter-input" placeholder="e.g. RISC-V Privileged Architecture">
+          </div>
+          <div>
+            <label style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:0.35rem;">Category</label>
+            <input type="text" id="pdf-doc-category" class="sidebar-filter-input" value="Imported Specifications">
+          </div>
+        </div>
+
+        <!-- Live Preview Textarea -->
+        <div style="margin-top:1rem;">
+          <label style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:0.35rem;">Extracted Markdown Preview</label>
+          <textarea id="pdf-extracted-preview" rows="8" class="sidebar-filter-input" style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;resize:vertical;" placeholder="Extracted text and markdown content will appear here..."></textarea>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.25rem;">
+          <button class="btn btn-secondary" id="btn-download-md">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            Download .md
+          </button>
+          <button class="btn btn-primary" id="btn-save-pdf-doc">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            Save & Add to Website
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Modal -->
+  <div class="modal-backdrop" id="search-modal">
+    <div class="modal-card" style="max-width:580px;">
+      <div class="search-input-wrapper">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" id="search-input" class="search-input" placeholder="Type to search documentation..." autofocus>
+        <button class="btn-icon" id="btn-close-search" style="width:28px;height:28px;">✕</button>
+      </div>
+      <ul id="search-results" class="search-results-list">
+        <!-- Rendered dynamically -->
+      </ul>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="app-toast" class="toast"></div>
+
+  <!-- App Scripts -->
+  <script src="js/docs-data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
