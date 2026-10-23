@@ -264,6 +264,7 @@
 
   // 4. Render Active Article
   function loadDoc(docId) {
+    if (docId === "sv39-mmu") docId = "module-2-sv39-mmu";
     const doc = docs.find(d => d.id === docId) || docs[0];
     if (!doc) return;
 
