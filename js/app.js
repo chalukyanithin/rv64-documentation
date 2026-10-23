@@ -43,18 +43,18 @@
     { num: 32, name: "pc", saver: "-", desc: "64-bit Program Counter (Reset: 0x80000000)" }
   ];
 
-  // Load custom imported docs from localStorage if any
-  let docs = window.DOCS_DATABASE || [];
+  // Load custom imported docs from localStorage if any (window.DOCS_DATABASE is always authoritative)
+  let docs = window.DOCS_DATABASE ? [...window.DOCS_DATABASE] : [];
   try {
     const saved = localStorage.getItem("rv64_custom_docs");
     if (saved) {
       const customDocs = JSON.parse(saved);
-      // Merge unique
-      customDocs.forEach(cd => {
-        if (!docs.some(d => d.id === cd.id)) {
-          docs.push(cd);
-        }
-      });
+      // Remove any custom doc whose id collides with built-in modules to avoid stale overrides
+      const validCustom = customDocs.filter(cd => !docs.some(d => d.id === cd.id));
+      if (validCustom.length !== customDocs.length) {
+        localStorage.setItem("rv64_custom_docs", JSON.stringify(validCustom));
+      }
+      validCustom.forEach(cd => docs.push(cd));
     }
   } catch (e) {
     console.warn("Storage access failed:", e);
@@ -112,17 +112,41 @@
     // If marked is loaded from CDN, use marked.parse with our custom renderers
     if (window.marked && typeof window.marked.parse === "function") {
       try {
-        // Pre-process callouts: > [!NOTE], > [!TIP], > [!WARNING], > [!IMPORTANT]
+        // 1. Task list checkboxes
+        content = content
+          .replace(/\[x\]/gi, '<span class="checklist-badge checked">✓</span>')
+          .replace(/\[ \]/gi, '<span class="checklist-badge">○</span>');
+
+        // 2. Math blocks: $$...$$
+        content = content.replace(/\$\$([\s\S]*?)\$\$/g, function (match, math) {
+          if (window.katex && typeof window.katex.renderToString === "function") {
+            try {
+              return `<div class="math-block">${window.katex.renderToString(math.trim(), { displayMode: true, throwOnError: false })}</div>\n\n`;
+            } catch (e) {}
+          }
+          const clean = cleanMathFallback(math.trim());
+          return `<div class="math-block"><code>${escapeHtml(clean)}</code></div>\n\n`;
+        });
+
+        // 3. Inline math: $...$
+        content = content.replace(/\$([^\$\n]+)\$/g, function (match, math) {
+          if (window.katex && typeof window.katex.renderToString === "function") {
+            try {
+              return window.katex.renderToString(math.trim(), { displayMode: false, throwOnError: false });
+            } catch (e) {}
+          }
+          const clean = cleanMathFallback(math.trim());
+          return `<code>${escapeHtml(clean)}</code>`;
+        });
+
+        // 4. GitHub-style callouts: > [!NOTE], etc.
         content = content.replace(/^>\s*\[!(NOTE|TIP|WARNING|IMPORTANT)\]\s*\n([\s\S]*?)(?=\n\n|\n[#>-]|$)/gim, function (match, type, body) {
           const t = type.toLowerCase();
           const title = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
-          const cleanBody = body.replace(/^>\s?/gm, "").trim();
-          return `<div class="callout ${t}"><div class="callout-title">${title}</div><p>${cleanBody}</p></div>\n\n`;
-        });
-
-        // Pre-process LaTeX/Math: $$...$$
-        content = content.replace(/\$\$([\s\S]*?)\$\$/g, function (match, math) {
-          return `<div class="math-block"><code>${escapeHtml(math.trim())}</code></div>\n\n`;
+          let cleanBody = body.replace(/^>\s?/gm, "").trim();
+          // Convert ### subheadings inside callouts to bold headers for clean card layout
+          cleanBody = cleanBody.replace(/^###\s*(.*)$/gm, "**$1**\n");
+          return `\n\n<div class="callout ${t}">\n\n<div class="callout-title">${title}</div>\n\n${cleanBody}\n\n</div>\n\n`;
         });
 
         const renderer = new window.marked.Renderer();
@@ -158,15 +182,6 @@
           `;
         };
 
-        // Custom list item renderer supporting task list [x]
-        renderer.listitem = function (item) {
-          let text = item.text || "";
-          text = text
-            .replace(/\[x\]/gi, '<span class="checklist-badge checked">✓</span>')
-            .replace(/\[ \]/gi, '<span class="checklist-badge">○</span>');
-          return `<li>${text}</li>`;
-        };
-
         return window.marked.parse(content, { renderer, gfm: true, breaks: false });
       } catch (err) {
         console.warn("marked error, falling back to internal parser:", err);
@@ -175,6 +190,44 @@
 
     // Comprehensive offline / fallback parser
     return internalMarkdownParser(content);
+  }
+
+  function cleanMathFallback(expr) {
+    if (!expr) return "";
+    const supMap = {
+      "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴",
+      "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹",
+      "+": "⁺", "-": "⁻", "=": "⁼", "(": "⁽", ")": "⁾",
+      "n": "ⁿ", "i": "ⁱ"
+    };
+
+    let res = expr
+      // Replace \text{...} with just inner text
+      .replace(/\\text\{([^}]+)\}/g, "$1")
+      // Replace superscripts ^{...} or ^d
+      .replace(/\^{([0-9+\-=()ni]+)}/g, (m, digits) => {
+        return digits.split("").map(c => supMap[c] || c).join("");
+      })
+      .replace(/\^([0-9+\-=()ni])/g, (m, c) => supMap[c] || c)
+      // LaTeX spacing & common symbols
+      .replace(/\\,/g, " ")
+      .replace(/\\;/g, " ")
+      .replace(/\\ /g, " ")
+      .replace(/\\quad/g, "  ")
+      .replace(/\\times/g, " × ")
+      .replace(/\\cdot/g, " · ")
+      .replace(/\\ll/g, " << ")
+      .replace(/\\gg/g, " >> ")
+      .replace(/\\to/g, " → ")
+      .replace(/\\rightarrow/g, " → ")
+      .replace(/\\le(q)?/g, " ≤ ")
+      .replace(/\\ge(q)?/g, " ≥ ")
+      .replace(/\\neq/g, " ≠ ")
+      .replace(/\\approx/g, " ≈ ")
+      .replace(/\\mid/g, " | ")
+      .replace(/\\_/g, "_");
+
+    return res.trim();
   }
 
   function internalMarkdownParser(md) {
@@ -201,10 +254,30 @@
       return key;
     });
 
-    // 2. Stash Math blocks
+    // 2. Stash Math blocks ($$...$$ and $...$)
     text = text.replace(/\$\$([\s\S]*?)\$\$/g, function (match, math) {
       const key = `@@MATH_TOKEN_${tokenIndex++}@@`;
-      tokens[key] = `<div class="math-block"><code>${escapeHtml(math.trim())}</code></div>`;
+      if (window.katex && typeof window.katex.renderToString === "function") {
+        try {
+          tokens[key] = `<div class="math-block">${window.katex.renderToString(math.trim(), { displayMode: true, throwOnError: false })}</div>`;
+          return key;
+        } catch (e) {}
+      }
+      const clean = cleanMathFallback(math.trim());
+      tokens[key] = `<div class="math-block"><code>${escapeHtml(clean)}</code></div>`;
+      return key;
+    });
+
+    text = text.replace(/\$([^\$\n]+)\$/g, function (match, math) {
+      const key = `@@MATH_TOKEN_${tokenIndex++}@@`;
+      if (window.katex && typeof window.katex.renderToString === "function") {
+        try {
+          tokens[key] = window.katex.renderToString(math.trim(), { displayMode: false, throwOnError: false });
+          return key;
+        } catch (e) {}
+      }
+      const clean = cleanMathFallback(math.trim());
+      tokens[key] = `<code>${escapeHtml(clean)}</code>`;
       return key;
     });
 
