@@ -576,19 +576,45 @@ body {
   font-size: 1.02rem;
 }
 
-.markdown-body ul, .markdown-body ol {
-  margin-bottom: 1.35rem;
+.markdown-body ul {
+  margin-bottom: 1.4rem;
   padding-left: 1.6rem;
   color: var(--text-secondary);
 }
 
+.markdown-body ol {
+  margin-bottom: 1.4rem;
+  padding-left: 1.8rem;
+  color: var(--text-secondary);
+}
+
 .markdown-body li {
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.55rem;
+  line-height: 1.7;
+}
+
+.markdown-body ol > li {
+  padding-left: 0.3rem;
+}
+
+.markdown-body ol > li::marker {
+  color: var(--accent-terracotta);
+  font-weight: 700;
+  font-size: 0.95em;
+}
+
+.markdown-body ul > li::marker {
+  color: var(--accent-terracotta);
+}
+
+.markdown-body li > ul, .markdown-body li > ol {
+  margin-top: 0.4rem;
+  margin-bottom: 0.4rem;
 }
 
 .markdown-body strong {
   color: var(--text-main);
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* Markdown Tables */

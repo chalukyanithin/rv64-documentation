@@ -89,21 +89,108 @@
     }, 3200);
   }
 
-  // 2. Custom Markdown Parser (Lightweight, pure client-side, zero dependencies)
+  // Copy code directly from DOM (prevents any attribute escaping issues)
+  window.appCopyCode = function (btn) {
+    const wrapper = btn.closest(".code-wrapper");
+    if (!wrapper) return;
+    const code = wrapper.querySelector("code");
+    if (!code) return;
+    navigator.clipboard.writeText(code.innerText).then(() => {
+      showToast("Copied code to clipboard!");
+    }).catch(() => {
+      showToast("Code copied!");
+    });
+  };
+
+  // 2. Custom Markdown Parser (Hybrid: Marked.js when available + robust internal fallback)
   function renderMarkdown(md) {
     if (!md) return "";
 
-    let html = md;
+    // 1. Normalize line endings (CRLF -> LF)
+    let content = md.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
 
-    // Code blocks with syntax highlighting container
-    html = html.replace(/```([a-zA-Z0-9_\-+]*)\n([\s\S]*?)```/g, function (match, lang, code) {
+    // If marked is loaded from CDN, use marked.parse with our custom renderers
+    if (window.marked && typeof window.marked.parse === "function") {
+      try {
+        // Pre-process callouts: > [!NOTE], > [!TIP], > [!WARNING], > [!IMPORTANT]
+        content = content.replace(/^>\s*\[!(NOTE|TIP|WARNING|IMPORTANT)\]\s*\n([\s\S]*?)(?=\n\n|\n[#>-]|$)/gim, function (match, type, body) {
+          const t = type.toLowerCase();
+          const title = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+          const cleanBody = body.replace(/^>\s?/gm, "").trim();
+          return `<div class="callout ${t}"><div class="callout-title">${title}</div><p>${cleanBody}</p></div>\n\n`;
+        });
+
+        // Pre-process LaTeX/Math: $$...$$
+        content = content.replace(/\$\$([\s\S]*?)\$\$/g, function (match, math) {
+          return `<div class="math-block"><code>${escapeHtml(math.trim())}</code></div>\n\n`;
+        });
+
+        const renderer = new window.marked.Renderer();
+
+        // Custom code block renderer
+        renderer.code = function ({ text, lang }) {
+          const safeCode = escapeHtml(text || "");
+          const displayLang = (lang || "code").toUpperCase();
+          return `
+            <div class="code-wrapper">
+              <div class="code-header">
+                <span class="code-lang-tag">${displayLang}</span>
+                <button class="btn-copy-code" onclick="window.appCopyCode(this)">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  Copy
+                </button>
+              </div>
+              <pre><code class="language-${lang}">${safeCode}</code></pre>
+            </div>
+          `;
+        };
+
+        // Custom image renderer with responsive frame
+        renderer.image = function ({ href, text, title }) {
+          const safeAlt = escapeHtml(text || title || "");
+          return `
+            <figure class="doc-figure">
+              <div class="doc-image-frame">
+                <img src="${href}" alt="${safeAlt}" class="doc-image" onclick="window.open('${href}', '_blank')">
+              </div>
+              ${safeAlt ? `<figcaption class="doc-image-caption"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:4px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>${safeAlt}</figcaption>` : ""}
+            </figure>
+          `;
+        };
+
+        // Custom list item renderer supporting task list [x]
+        renderer.listitem = function (item) {
+          let text = item.text || "";
+          text = text
+            .replace(/\[x\]/gi, '<span class="checklist-badge checked">✓</span>')
+            .replace(/\[ \]/gi, '<span class="checklist-badge">○</span>');
+          return `<li>${text}</li>`;
+        };
+
+        return window.marked.parse(content, { renderer, gfm: true, breaks: false });
+      } catch (err) {
+        console.warn("marked error, falling back to internal parser:", err);
+      }
+    }
+
+    // Comprehensive offline / fallback parser
+    return internalMarkdownParser(content);
+  }
+
+  function internalMarkdownParser(md) {
+    let tokens = {};
+    let tokenIndex = 0;
+
+    // 1. Stash Code blocks first (handles CRLF and LF cleanly)
+    let text = md.replace(/```([a-zA-Z0-9_\-+]*)\r?\n([\s\S]*?)```/g, function (match, lang, code) {
+      const key = `@@CODE_TOKEN_${tokenIndex++}@@`;
       const safeCode = escapeHtml(code.trim());
       const displayLang = (lang || "code").toUpperCase();
-      return `
+      tokens[key] = `
         <div class="code-wrapper">
           <div class="code-header">
             <span class="code-lang-tag">${displayLang}</span>
-            <button class="btn-copy-code" onclick="navigator.clipboard.writeText(\`${escapeForAttr(code.trim())}\`); window.appShowToast('Copied code to clipboard!');">
+            <button class="btn-copy-code" onclick="window.appCopyCode(this)">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
               Copy
             </button>
@@ -111,92 +198,121 @@
           <pre><code class="language-${lang}">${safeCode}</code></pre>
         </div>
       `;
+      return key;
     });
 
-    // Callout blocks: > [!NOTE], > [!TIP], > [!WARNING], > [!IMPORTANT]
-    html = html.replace(/^>\s*\[!(NOTE|TIP|WARNING|IMPORTANT)\]\s*\n([\s\S]*?)(?=\n\n|$)/gim, function (match, type, content) {
-      const t = type.toLowerCase();
-      const title = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
-      const cleanedContent = content.replace(/^>\s?/gm, '').trim();
-      return `
-        <div class="callout ${t}">
-          <div class="callout-title">${title}</div>
-          <p>${cleanedContent}</p>
-        </div>
-      `;
+    // 2. Stash Math blocks
+    text = text.replace(/\$\$([\s\S]*?)\$\$/g, function (match, math) {
+      const key = `@@MATH_TOKEN_${tokenIndex++}@@`;
+      tokens[key] = `<div class="math-block"><code>${escapeHtml(math.trim())}</code></div>`;
+      return key;
     });
 
-    // Markdown tables
-    html = html.replace(/\n(\|.+?\|\n\|[-:| ]+?\|\n(?:\|.+?\|\n?)+)/g, function (match, tableText) {
-      const lines = tableText.trim().split('\n');
-      if (lines.length < 3) return match;
-      const headers = lines[0].split('|').map(s => s.trim()).filter(Boolean);
-      const rows = lines.slice(2).map(line => line.split('|').map(s => s.trim()).filter(Boolean));
-
-      let tableHtml = '<table><thead><tr>';
-      headers.forEach(h => {
-        tableHtml += `<th>${parseInline(h)}</th>`;
-      });
-      tableHtml += '</tr></thead><tbody>';
-      rows.forEach(r => {
-        tableHtml += '<tr>';
-        r.forEach(cell => {
-          tableHtml += `<td>${parseInline(cell)}</td>`;
-        });
-        tableHtml += '</tr>';
-      });
-      tableHtml += '</tbody></table>';
-      return tableHtml;
-    });
-
-    // Headings
-    html = html.replace(/^### (.*$)/gim, '<h3 id="$1">$1</h3>');
-    html = html.replace(/^## (.*$)/gim, '<h2 id="$1">$1</h2>');
-    html = html.replace(/^# (.*$)/gim, '<h1 id="$1">$1</h1>');
-
-    // Horizontal Rule
-    html = html.replace(/^---$/gim, '<hr style="border:none;border-top:1px solid var(--border-light);margin:2rem 0;">');
-
-    // Lists
-    html = html.replace(/^\- (.*$)/gim, '<li>$1</li>');
-    html = html.replace(/(<li>.*<\/li>)/gms, '<ul>$1</ul>');
-    html = html.replace(/<\/ul>\s*<ul>/g, '');
-
-    // Images: ![alt](url)
-    html = html.replace(/!\[(.*?)\]\((.*?)\)/g, function (match, alt, src) {
-      return `
+    // 3. Stash Images
+    text = text.replace(/!\[(.*?)\]\((.*?)\)/g, function (match, alt, src) {
+      const key = `@@IMG_TOKEN_${tokenIndex++}@@`;
+      tokens[key] = `
         <figure class="doc-figure">
           <div class="doc-image-frame">
             <img src="${src}" alt="${escapeHtml(alt)}" class="doc-image" onclick="window.open('${src}', '_blank')">
           </div>
-          ${alt ? `<figcaption class="doc-image-caption"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:4px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>${escapeHtml(alt)}</figcaption>` : ''}
+          ${alt ? `<figcaption class="doc-image-caption"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:inline;margin-right:4px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>${escapeHtml(alt)}</figcaption>` : ""}
         </figure>
       `;
+      return key;
     });
 
-    // Math block: $$...$$
-    html = html.replace(/\$\$([\s\S]*?)\$\$/g, function (match, math) {
-      return `<div class="math-block"><code>${escapeHtml(math.trim())}</code></div>`;
+    // 4. Callout blocks
+    text = text.replace(/^>\s*\[!(NOTE|TIP|WARNING|IMPORTANT)\]\s*\n([\s\S]*?)(?=\n\n|$)/gim, function (match, type, content) {
+      const t = type.toLowerCase();
+      const title = type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+      const cleanedContent = parseInline(content.replace(/^>\s?/gm, "").trim());
+      return `<div class="callout ${t}"><div class="callout-title">${title}</div><p>${cleanedContent}</p></div>`;
     });
 
-    // Paragraphs
-    html = html.split('\n\n').map(p => {
+    // 5. Tables
+    text = text.replace(/\n(\|.+?\|\n\|[-:| ]+?\|\n(?:\|.+?\|\n?)+)/g, function (match, tableText) {
+      const lines = tableText.trim().split("\n");
+      if (lines.length < 3) return match;
+      const headers = lines[0].split("|").map(s => s.trim()).filter(Boolean);
+      const rows = lines.slice(2).map(line => line.split("|").map(s => s.trim()).filter(Boolean));
+
+      let tableHtml = "<table><thead><tr>";
+      headers.forEach(h => {
+        tableHtml += `<th>${parseInline(h)}</th>`;
+      });
+      tableHtml += "</tr></thead><tbody>";
+      rows.forEach(r => {
+        tableHtml += "<tr>";
+        r.forEach(cell => {
+          tableHtml += `<td>${parseInline(cell)}</td>`;
+        });
+        tableHtml += "</tr>";
+      });
+      tableHtml += "</tbody></table>";
+      return "\n" + tableHtml + "\n";
+    });
+
+    // 6. Headings (with parseInline!)
+    text = text.replace(/^### (.*$)/gim, function (m, h) { return `<h3 id="${escapeHtml(h)}">${parseInline(h)}</h3>`; });
+    text = text.replace(/^## (.*$)/gim, function (m, h) { return `<h2 id="${escapeHtml(h)}">${parseInline(h)}</h2>`; });
+    text = text.replace(/^# (.*$)/gim, function (m, h) { return `<h1 id="${escapeHtml(h)}">${parseInline(h)}</h1>`; });
+
+    // 7. Horizontal Rule
+    text = text.replace(/^---$/gim, '<hr style="border:none;border-top:1px solid var(--border-light);margin:2rem 0;">');
+
+    // 8. Ordered Lists (1. 2. 3.)
+    text = text.replace(/((?:^[0-9]+\.\s+.*(?:\n|$))+)/gm, function (match, listBlock) {
+      const items = listBlock.trim().split("\n").map(line => {
+        const itemText = line.replace(/^[0-9]+\.\s+/, "");
+        return `<li>${parseInline(itemText)}</li>`;
+      });
+      return `<ol>${items.join("")}</ol>\n\n`;
+    });
+
+    // 9. Unordered Lists (- or * or •)
+    text = text.replace(/((?:^[ \t]*[-*•]\s+.*(?:\n|$))+)/gm, function (match, listBlock) {
+      const items = listBlock.trim().split("\n").map(line => {
+        const itemText = line.replace(/^[ \t]*[-*•]\s+/, "");
+        return `<li>${parseInline(itemText)}</li>`;
+      });
+      return `<ul>${items.join("")}</ul>\n\n`;
+    });
+
+    // 10. Paragraphs
+    let blocks = text.split(/\n{2,}/);
+    let result = blocks.map(p => {
       const trimmed = p.trim();
       if (!trimmed) return "";
-      if (trimmed.startsWith('<h') || trimmed.startsWith('<div') || trimmed.startsWith('<table') || trimmed.startsWith('<ul') || trimmed.startsWith('<hr') || trimmed.startsWith('<figure')) {
+      if (
+        trimmed.startsWith("<h") ||
+        trimmed.startsWith("<div") ||
+        trimmed.startsWith("<table") ||
+        trimmed.startsWith("<ul") ||
+        trimmed.startsWith("<ol") ||
+        trimmed.startsWith("<hr") ||
+        trimmed.startsWith("<figure") ||
+        trimmed.startsWith("@@")
+      ) {
         return trimmed;
       }
       return `<p>${parseInline(trimmed)}</p>`;
-    }).join('\n\n');
+    }).join("\n\n");
 
-    return html;
+    // 11. Restore all tokens
+    Object.keys(tokens).forEach(key => {
+      result = result.split(key).join(tokens[key]);
+    });
+
+    return result;
   }
 
   function parseInline(text) {
+    if (!text) return "";
     return text
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*([^*]+)\*/g, "<em>$1</em>")
       .replace(/\[x\]/gi, '<span class="checklist-badge checked">✓</span>')
       .replace(/\[ \]/gi, '<span class="checklist-badge">○</span>')
       .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color:var(--accent-terracotta);font-weight:600;">$1</a>');
@@ -204,13 +320,9 @@
 
   function escapeHtml(str) {
     return str
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
-  }
-
-  function escapeForAttr(str) {
-    return str.replace(/`/g, '\\`').replace(/\$/g, '\\$').replace(/"/g, '&quot;');
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
   }
 
   window.appShowToast = showToast;
