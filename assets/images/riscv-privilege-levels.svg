@@ -1,0 +1,192 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 860" width="100%" height="100%" style="font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;">
+  <defs>
+    <filter id="shadow" x="-3%" y="-2%" width="106%" height="108%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#4B2F1F" flood-opacity="0.08" />
+    </filter>
+    <linearGradient id="mModeGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFF5F2"/>
+      <stop offset="100%" stop-color="#FFEAE3"/>
+    </linearGradient>
+    <linearGradient id="sModeGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F2F8FD"/>
+      <stop offset="100%" stop-color="#E5F1FB"/>
+    </linearGradient>
+    <linearGradient id="uModeGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F2FAF5"/>
+      <stop offset="100%" stop-color="#E2F5E9"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#B9663E"/>
+    </marker>
+  </defs>
+
+  <!-- Left Privilege Spine -->
+  <line x1="36" y1="50" x2="36" y2="810" stroke="#B88B6E" stroke-width="2.5" stroke-dasharray="6,4"/>
+  <polygon points="36,40 31,52 41,52" fill="#B88B6E"/>
+  <polygon points="36,820 31,808 41,808" fill="#B88B6E"/>
+  <text x="24" y="430" font-size="11" font-weight="700" fill="#885A3F" transform="rotate(-90 24 430)" text-anchor="middle" letter-spacing="2">PRIVILEGE LEVEL HIERARCHY</text>
+
+  <!-- ================= MACHINE MODE (M-MODE) ================= -->
+  <g transform="translate(68, 30)">
+    <rect width="820" height="225" rx="14" fill="url(#mModeGrad)" stroke="#E05D44" stroke-width="2" filter="url(#shadow)"/>
+    
+    <!-- Level Badge -->
+    <rect x="18" y="18" width="115" height="54" rx="8" fill="#E05D44"/>
+    <text x="75" y="40" font-size="12" font-weight="800" fill="#FFFFFF" text-anchor="middle">Mode 3</text>
+    <text x="75" y="58" font-size="11" font-weight="700" fill="#FFEAE3" text-anchor="middle">(M-Mode)</text>
+    <rect x="18" y="78" width="115" height="24" rx="6" fill="#FADBD4"/>
+    <text x="75" y="94" font-size="9.5" font-weight="700" fill="#A82810" text-anchor="middle">Highest Level (3)</text>
+
+    <!-- Header & Description -->
+    <text x="150" y="40" font-size="19" font-weight="800" fill="#2D231E">Machine Mode (M-Mode)</text>
+    <text x="150" y="60" font-size="13.5" font-weight="600" fill="#C0392B">Platform Firmware / OpenSBI</text>
+
+    <!-- Bullet Points -->
+    <g transform="translate(150, 84)" font-size="12" fill="#3D3028">
+      <circle cx="4" cy="4" r="3" fill="#E05D44"/>
+      <text x="14" y="8" font-weight="500">Full physical memory &amp; device access (untranslated, raw physical)</text>
+      <circle cx="4" cy="28" r="3" fill="#E05D44"/>
+      <text x="14" y="32" font-weight="500">Runs boot firmware (e.g., OpenSBI runtime services)</text>
+      <circle cx="4" cy="52" r="3" fill="#E05D44"/>
+      <text x="14" y="56" font-weight="500">Initializes hardware, clocks, and platform configuration</text>
+      <circle cx="4" cy="76" r="3" fill="#E05D44"/>
+      <text x="14" y="80" font-weight="500">Controls trap delegation (<tspan font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#A82810">medeleg</tspan>, <tspan font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#A82810">mideleg</tspan>)</text>
+      <circle cx="4" cy="100" r="3" fill="#E05D44"/>
+      <text x="14" y="104" font-weight="500">Handles machine-level timer/software interrupts and hardware exceptions</text>
+    </g>
+
+    <!-- Key CSRs Box -->
+    <rect x="600" y="16" width="202" height="193" rx="10" fill="#FFFFFF" stroke="#F0B2A6" stroke-width="1.5"/>
+    <rect x="600" y="16" width="202" height="32" rx="10" fill="#FDF2E9"/>
+    <text x="701" y="37" font-size="11.5" font-weight="800" fill="#9C341E" text-anchor="middle">Key CSRs (M-Mode)</text>
+    
+    <g transform="translate(614, 66)" font-size="11">
+      <text x="0" y="0" font-family="'JetBrains Mono', monospace" font-weight="700" fill="#A82810">mstatus</text>
+      <text x="72" y="0" fill="#6A5A50">Machine status</text>
+      <text x="0" y="24" font-family="'JetBrains Mono', monospace" font-weight="700" fill="#A82810">medeleg</text>
+      <text x="72" y="24" fill="#6A5A50">Exception deleg</text>
+      <text x="0" y="48" font-family="'JetBrains Mono', monospace" font-weight="700" fill="#A82810">mideleg</text>
+      <text x="72" y="48" fill="#6A5A50">Interrupt deleg</text>
+      <text x="0" y="72" font-family="'JetBrains Mono', monospace" font-weight="700" fill="#A82810">mtvec</text>
+      <text x="72" y="72" fill="#6A5A50">Trap vector base</text>
+      <text x="0" y="96" font-family="'JetBrains Mono', monospace" font-weight="700" fill="#A82810">mepc</text>
+      <text x="72" y="96" fill="#6A5A50">Exception PC</text>
+      <text x="0" y="120" font-family="'JetBrains Mono', monospace" font-weight="700" fill="#A82810">mcause</text>
+      <text x="72" y="120" fill="#6A5A50">Exception cause</text>
+    </g>
+  </g>
+
+  <!-- Delegation Connector -->
+  <g transform="translate(68, 255)">
+    <line x1="410" y1="6" x2="410" y2="40" stroke="#B9663E" stroke-width="2.5" marker-end="url(#arrow)"/>
+    <rect x="235" y="10" width="350" height="26" rx="6" fill="#FDFCF7" stroke="#DEC4AD" stroke-width="1.2"/>
+    <text x="410" y="27" font-size="11" font-weight="700" fill="#885A3F" text-anchor="middle">
+      <tspan fill="#B9663E">▼ Delegated Traps:</tspan> Bypass M-Mode via medeleg / mideleg
+    </text>
+  </g>
+
+  <!-- ================= SUPERVISOR MODE (S-MODE) ================= -->
+  <g transform="translate(68, 300)">
+    <rect width="820" height="235" rx="14" fill="url(#sModeGrad)" stroke="#2B7DE9" stroke-width="2" filter="url(#shadow)"/>
+    
+    <!-- Level Badge -->
+    <rect x="18" y="18" width="115" height="54" rx="8" fill="#2B7DE9"/>
+    <text x="75" y="40" font-size="12" font-weight="800" fill="#FFFFFF" text-anchor="middle">Mode 1</text>
+    <text x="75" y="58" font-size="11" font-weight="700" fill="#D6E8FC" text-anchor="middle">(S-Mode)</text>
+    <rect x="18" y="78" width="115" height="24" rx="6" fill="#D3E6FD"/>
+    <text x="75" y="94" font-size="9.5" font-weight="700" fill="#154EA6" text-anchor="middle">Privilege Level (1)</text>
+
+    <!-- Header & Description -->
+    <text x="150" y="40" font-size="19" font-weight="800" fill="#2D231E">Supervisor Mode (S-Mode)</text>
+    <text x="150" y="60" font-size="13.5" font-weight="600" fill="#246BB4">Linux Kernel (Operating System)</text>
+
+    <!-- Bullet Points -->
+    <g transform="translate(150, 84)" font-size="12" fill="#3D3028">
+      <circle cx="4" cy="4" r="3" fill="#2B7DE9"/>
+      <text x="14" y="8" font-weight="500">Manages virtual memory paging (<tspan font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#154EA6">satp</tspan> CSR, Sv39 page tables)</text>
+      <circle cx="4" cy="27" r="3" fill="#2B7DE9"/>
+      <text x="14" y="31" font-weight="500">Handles system calls (<tspan font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#154EA6">ecall</tspan> issued from U-Mode)</text>
+      <circle cx="4" cy="50" r="3" fill="#2B7DE9"/>
+      <text x="14" y="54" font-weight="500">Handles page faults, timer interrupts, and peripheral device IRQs</text>
+      <circle cx="4" cy="73" r="3" fill="#2B7DE9"/>
+      <text x="14" y="77" font-weight="500">Manages process scheduling, kernel threads, and IPC</text>
+      <circle cx="4" cy="96" r="3" fill="#2B7DE9"/>
+      <text x="14" y="100" font-weight="500">Access to most privileged instructions (isolated from M-Mode CSRs)</text>
+    </g>
+
+    <!-- Key CSRs Box -->
+    <rect x="600" y="16" width="202" height="203" rx="10" fill="#FFFFFF" stroke="#B8D7FC" stroke-width="1.5"/>
+    <rect x="600" y="16" width="202" height="32" rx="10" fill="#F0F6FE"/>
+    <text x="701" y="37" font-size="11.5" font-weight="800" fill="#154EA6" text-anchor="middle">Key CSRs (S-Mode)</text>
+    
+    <g transform="translate(614, 64)" font-size="10.5">
+      <text x="0" y="0" font-family="'JetBrains Mono', monospace" font-weight="700" fill="#1E5EB5">sstatus</text>
+      <text x="70" y="0" fill="#6A5A50">Supervisor status</text>
+      <text x="0" y="21" font-family="'JetBrains Mono', monospace" font-weight="700" fill="#1E5EB5">satp</text>
+      <text x="70" y="21" fill="#6A5A50">Page table root/mode</text>
+      <text x="0" y="42" font-family="'JetBrains Mono', monospace" font-weight="700" fill="#1E5EB5">stvec</text>
+      <text x="70" y="42" fill="#6A5A50">Trap vector base</text>
+      <text x="0" y="63" font-family="'JetBrains Mono', monospace" font-weight="700" fill="#1E5EB5">sepc</text>
+      <text x="70" y="63" fill="#6A5A50">Exception PC</text>
+      <text x="0" y="84" font-family="'JetBrains Mono', monospace" font-weight="700" fill="#1E5EB5">scause</text>
+      <text x="70" y="84" fill="#6A5A50">Exception cause</text>
+      <text x="0" y="105" font-family="'JetBrains Mono', monospace" font-weight="700" fill="#1E5EB5">sie/sip</text>
+      <text x="70" y="105" fill="#6A5A50">Interrupt enable/pend</text>
+      <text x="0" y="126" font-family="'JetBrains Mono', monospace" font-weight="700" fill="#1E5EB5">sscratch</text>
+      <text x="70" y="126" fill="#6A5A50">Scratch register</text>
+    </g>
+  </g>
+
+  <!-- Trap Connector -->
+  <g transform="translate(68, 536)">
+    <line x1="410" y1="6" x2="410" y2="40" stroke="#B9663E" stroke-width="2.5" marker-end="url(#arrow)"/>
+    <rect x="220" y="10" width="380" height="26" rx="6" fill="#FDFCF7" stroke="#DEC4AD" stroke-width="1.2"/>
+    <text x="410" y="27" font-size="11" font-weight="700" fill="#885A3F" text-anchor="middle">
+      <tspan fill="#B9663E">▲ ecall / Syscall Trap:</tspan> Transitions U-Mode → S-Mode Handler
+    </text>
+  </g>
+
+  <!-- ================= USER MODE (U-MODE) ================= -->
+  <g transform="translate(68, 580)">
+    <rect width="820" height="215" rx="14" fill="url(#uModeGrad)" stroke="#1FB864" stroke-width="2" filter="url(#shadow)"/>
+    
+    <!-- Level Badge -->
+    <rect x="18" y="18" width="115" height="54" rx="8" fill="#1FB864"/>
+    <text x="75" y="40" font-size="12" font-weight="800" fill="#FFFFFF" text-anchor="middle">Mode 0</text>
+    <text x="75" y="58" font-size="11" font-weight="700" fill="#D8F6E4" text-anchor="middle">(U-Mode)</text>
+    <rect x="18" y="78" width="115" height="24" rx="6" fill="#D3F5E1"/>
+    <text x="75" y="94" font-size="9.5" font-weight="700" fill="#0E783D" text-anchor="middle">Lowest Level (0)</text>
+
+    <!-- Header & Description -->
+    <text x="150" y="40" font-size="19" font-weight="800" fill="#2D231E">User Mode (U-Mode)</text>
+    <text x="150" y="60" font-size="13.5" font-weight="600" fill="#138A4A">User Applications / BusyBox Shell</text>
+
+    <!-- Bullet Points -->
+    <g transform="translate(150, 84)" font-size="12" fill="#3D3028">
+      <circle cx="4" cy="4" r="3" fill="#1FB864"/>
+      <text x="14" y="8" font-weight="500">Executes userland processes (e.g., <tspan font-family="'JetBrains Mono', monospace" font-size="11">/bin/sh</tspan>, user utilities)</text>
+      <circle cx="4" cy="27" r="3" fill="#1FB864"/>
+      <text x="14" y="31" font-weight="500">Restricted instructions: direct access to CSRs or MMIO triggers Illegal Instruction</text>
+      <circle cx="4" cy="50" r="3" fill="#1FB864"/>
+      <text x="14" y="54" font-weight="500">Restricted virtual memory access: page table entries must have <tspan font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700">U=1</tspan> bit set</text>
+      <circle cx="4" cy="73" r="3" fill="#1FB864"/>
+      <text x="14" y="77" font-weight="500">Executes <tspan font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#0E783D">ecall</tspan> instruction to request OS services via controlled Trap</text>
+    </g>
+
+    <!-- Examples Box -->
+    <rect x="600" y="16" width="202" height="183" rx="10" fill="#FFFFFF" stroke="#BDE8CD" stroke-width="1.5"/>
+    <rect x="600" y="16" width="202" height="32" rx="10" fill="#F0FAF4"/>
+    <text x="701" y="37" font-size="11.5" font-weight="800" fill="#0E783D" text-anchor="middle">Userspace Stack</text>
+    
+    <g transform="translate(614, 66)" font-size="11">
+      <text x="0" y="0" font-family="'JetBrains Mono', monospace" font-weight="700" fill="#0E783D">/bin/bash</text>
+      <text x="80" y="0" fill="#6A5A50">Interactive shell</text>
+      <text x="0" y="24" font-family="'JetBrains Mono', monospace" font-weight="700" fill="#0E783D">BusyBox</text>
+      <text x="80" y="24" fill="#6A5A50">Core utilities</text>
+      <text x="0" y="48" font-family="'JetBrains Mono', monospace" font-weight="700" fill="#0E783D">libc</text>
+      <text x="80" y="48" fill="#6A5A50">C runtime library</text>
+      <text x="0" y="72" font-family="'JetBrains Mono', monospace" font-weight="700" fill="#0E783D">Apps</text>
+      <text x="80" y="72" fill="#6A5A50">User binaries</text>
+    </g>
+  </g>
+</svg>
