@@ -1,0 +1,157 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 440" width="100%" height="100%" style="font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;">
+  <defs>
+    <!-- Drop Shadow Filter -->
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="112%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="#4B2F1F" flood-opacity="0.08" />
+    </filter>
+    <filter id="shadow-sm" x="-4%" y="-4%" width="108%" height="114%" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#4B2F1F" flood-opacity="0.06" />
+    </filter>
+
+    <!-- Gradients -->
+    <linearGradient id="instGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F2F8FD"/>
+      <stop offset="100%" stop-color="#E2EEFA"/>
+    </linearGradient>
+    <linearGradient id="actionGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FCFBF7"/>
+      <stop offset="100%" stop-color="#F5EFE6"/>
+    </linearGradient>
+    <linearGradient id="decisionGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FFF8F0"/>
+      <stop offset="100%" stop-color="#FDE8D7"/>
+    </linearGradient>
+    <linearGradient id="successGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F0FDF4"/>
+      <stop offset="100%" stop-color="#DCFCE7"/>
+    </linearGradient>
+    <linearGradient id="failGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#FEF2F2"/>
+      <stop offset="100%" stop-color="#FEE2E2"/>
+    </linearGradient>
+
+    <!-- Arrow Markers -->
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#2B7DE9"/>
+    </marker>
+    <marker id="arrow-brown" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#885A3F"/>
+    </marker>
+    <marker id="arrow-red" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#DC2626"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1.5 L 9 5 L 0 8.5 z" fill="#16A34A"/>
+    </marker>
+  </defs>
+
+  <!-- Container Box -->
+  <rect width="940" height="440" rx="16" fill="#FDFCF7" stroke="#DEC4AD" stroke-width="1.5" filter="url(#shadow)"/>
+
+  <!-- Diagram Title Header -->
+  <g transform="translate(32, 28)">
+    <rect width="32" height="32" rx="8" fill="#B9663E" opacity="0.12"/>
+    <text x="16" y="21" font-size="16" text-anchor="middle" fill="#B9663E">⚡</text>
+    <text x="44" y="21" font-size="16" font-weight="800" fill="#2D231E" letter-spacing="-0.2">CPU / Hart Memory Bus Reservation Controller</text>
+    <text x="500" y="21" font-size="12" font-weight="600" fill="#885A3F">(Atomic lr.d / sc.d Reservation Set Protocol)</text>
+  </g>
+
+  <!-- ================= ROW 1: LOAD-RESERVED (lr.d) ================= -->
+  <!-- Step 1: lr.d instruction -->
+  <g transform="translate(36, 85)" filter="url(#shadow-sm)">
+    <rect width="130" height="68" rx="10" fill="url(#instGrad)" stroke="#2B7DE9" stroke-width="2"/>
+    <text x="65" y="28" font-size="11" font-weight="700" fill="#154EA6" text-anchor="middle">INSTRUCTION</text>
+    <text x="65" y="50" font-family="'JetBrains Mono', monospace" font-size="15" font-weight="700" fill="#0E387A" text-anchor="middle">lr.d r1</text>
+  </g>
+
+  <!-- Flow Arrow: lr.d -> Read PA -->
+  <line x1="168" y1="119" x2="226" y2="119" stroke="#2B7DE9" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+
+  <!-- Step 2: Read PA -->
+  <g transform="translate(230, 85)" filter="url(#shadow-sm)">
+    <rect width="160" height="68" rx="10" fill="url(#actionGrad)" stroke="#B88B6E" stroke-width="1.5"/>
+    <text x="80" y="28" font-size="11" font-weight="700" fill="#885A3F" text-anchor="middle">BUS READ</text>
+    <text x="80" y="50" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="700" fill="#2D231E" text-anchor="middle">Read PA</text>
+  </g>
+
+  <!-- Flow Arrow: Read PA -> Register PA -->
+  <line x1="392" y1="119" x2="446" y2="119" stroke="#2B7DE9" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+
+  <!-- Step 3: Register PA Address -->
+  <g transform="translate(450, 85)" filter="url(#shadow-sm)">
+    <rect width="200" height="68" rx="10" fill="url(#actionGrad)" stroke="#B9663E" stroke-width="2"/>
+    <text x="100" y="28" font-size="11" font-weight="700" fill="#B9663E" text-anchor="middle">HARDWARE STATE</text>
+    <text x="100" y="50" font-size="13.5" font-weight="700" fill="#2D231E" text-anchor="middle">Register PA Address</text>
+  </g>
+
+  <!-- Invalidation Event Label & Dashed Loop -->
+  <g transform="translate(668, 85)">
+    <!-- Explanatory Invalidation Bubble -->
+    <rect x="0" y="0" width="235" height="56" rx="8" fill="#FEF2F2" stroke="#FCA5A5" stroke-width="1.2"/>
+    <text x="117" y="20" font-size="10.5" font-weight="700" fill="#DC2626" text-anchor="middle">Context Switch / Interrupt /</text>
+    <text x="117" y="38" font-size="10.5" font-weight="700" fill="#DC2626" text-anchor="middle">Store to PA invalidates reservation</text>
+    
+    <!-- Dashed Red Curve connecting to Check PA Valid -->
+    <path d="M 0 28 C -30 28, -80 70, -118 125" fill="none" stroke="#DC2626" stroke-width="2" stroke-dasharray="5,4" marker-end="url(#arrow-red)"/>
+  </g>
+
+  <!-- ================= ROW 2: STORE-CONDITIONAL (sc.d) ================= -->
+  <!-- Step 1: sc.d instruction -->
+  <g transform="translate(36, 215)" filter="url(#shadow-sm)">
+    <rect width="130" height="68" rx="10" fill="url(#instGrad)" stroke="#2B7DE9" stroke-width="2"/>
+    <text x="65" y="28" font-size="11" font-weight="700" fill="#154EA6" text-anchor="middle">INSTRUCTION</text>
+    <text x="65" y="50" font-family="'JetBrains Mono', monospace" font-size="15" font-weight="700" fill="#0E387A" text-anchor="middle">sc.d r2</text>
+  </g>
+
+  <!-- Flow Arrow: sc.d -> Write PA -->
+  <line x1="168" y1="249" x2="226" y2="249" stroke="#2B7DE9" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+
+  <!-- Step 2: Write PA Request -->
+  <g transform="translate(230, 215)" filter="url(#shadow-sm)">
+    <rect width="160" height="68" rx="10" fill="url(#actionGrad)" stroke="#B88B6E" stroke-width="1.5"/>
+    <text x="80" y="28" font-size="11" font-weight="700" fill="#885A3F" text-anchor="middle">BUS ATTEMPT</text>
+    <text x="80" y="50" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="700" fill="#2D231E" text-anchor="middle">Write PA</text>
+  </g>
+
+  <!-- Flow Arrow: Write PA -> Check PA Valid? -->
+  <line x1="392" y1="249" x2="456" y2="249" stroke="#2B7DE9" stroke-width="2.5" marker-end="url(#arrow-blue)"/>
+
+  <!-- Step 3: Decision Diamond / Rounded Box -->
+  <g transform="translate(460, 205)" filter="url(#shadow-sm)">
+    <polygon points="90,0 180,44 90,88 0,44" fill="url(#decisionGrad)" stroke="#C8794E" stroke-width="2"/>
+    <text x="90" y="40" font-size="12" font-weight="800" fill="#6B442E" text-anchor="middle">Check PA</text>
+    <text x="90" y="56" font-size="12" font-weight="800" fill="#6B442E" text-anchor="middle">Valid?</text>
+  </g>
+
+  <!-- Flow Arrow: Check PA Valid (YES) -> Success Box -->
+  <line x1="642" y1="249" x2="706" y2="249" stroke="#16A34A" stroke-width="2.5" marker-end="url(#arrow-green)"/>
+  <!-- YES Badge -->
+  <rect x="652" y="235" width="42" height="20" rx="4" fill="#DCFCE7"/>
+  <text x="673" y="249" font-size="11" font-weight="800" fill="#15803D" text-anchor="middle">YES</text>
+
+  <!-- Success Box -->
+  <g transform="translate(710, 215)" filter="url(#shadow-sm)">
+    <rect width="194" height="68" rx="10" fill="url(#successGrad)" stroke="#16A34A" stroke-width="2"/>
+    <text x="97" y="28" font-size="11" font-weight="700" fill="#15803D" text-anchor="middle">SUCCESS (LOCK GRANTED)</text>
+    <text x="97" y="51" font-family="'JetBrains Mono', monospace" font-size="13.5" font-weight="700" fill="#14532D" text-anchor="middle">YES &#8594; r2 = 0</text>
+  </g>
+
+  <!-- Flow Arrow: Check PA Valid (NO) -> Failure Box -->
+  <path d="M 550 295 L 550 354 L 706 354" fill="none" stroke="#DC2626" stroke-width="2.5" marker-end="url(#arrow-red)"/>
+  <!-- NO Badge -->
+  <rect x="532" y="308" width="36" height="20" rx="4" fill="#FEE2E2"/>
+  <text x="550" y="322" font-size="11" font-weight="800" fill="#B91C1C" text-anchor="middle">NO</text>
+
+  <!-- Failure Box -->
+  <g transform="translate(710, 320)" filter="url(#shadow-sm)">
+    <rect width="194" height="68" rx="10" fill="url(#failGrad)" stroke="#DC2626" stroke-width="2"/>
+    <text x="97" y="28" font-size="11" font-weight="700" fill="#B91C1C" text-anchor="middle">FAILURE (STORE CANCELLED)</text>
+    <text x="97" y="51" font-family="'JetBrains Mono', monospace" font-size="13.5" font-weight="700" fill="#7F1D1D" text-anchor="middle">NO &#8594; r2 = 1</text>
+  </g>
+
+  <!-- Footer Legend / Info Note -->
+  <g transform="translate(36, 405)" font-size="11.5" fill="#885A3F">
+    <circle cx="6" cy="4" r="3" fill="#B9663E"/>
+    <text x="16" y="8" font-weight="600">Physical address registration ensures safe synchronization without requiring hardware memory bus locks.</text>
+  </g>
+</svg>

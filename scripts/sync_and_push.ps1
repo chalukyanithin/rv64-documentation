@@ -18,12 +18,12 @@ if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
 # Check git status
 $status = git status --porcelain
 if (-not $status) {
-    Write-Host "`n✓ No unstaged changes detected. Working tree is clean." -ForegroundColor Green
+    Write-Host "`n[OK] No unstaged changes detected. Working tree is clean." -ForegroundColor Green
     
     # Try pushing unpushed commits if any
     Write-Host "Checking for unpushed commits..." -ForegroundColor Cyan
     git push origin main 2>&1
-    Write-Host "✓ Remote is fully up to date." -ForegroundColor Green
+    Write-Host "[OK] Remote is fully up to date." -ForegroundColor Green
     exit 0
 }
 
@@ -49,11 +49,11 @@ Write-Host "3. Pushing to origin $currentBranch..." -ForegroundColor Cyan
 try {
     git push -u origin $currentBranch
     Write-Host "`n==========================================================" -ForegroundColor Green
-    Write-Host "✓ SUCCESS: Changes pushed to GitHub origin/$currentBranch!" -ForegroundColor Green
-    Write-Host "⚡ Vercel will automatically detect this push and redeploy within 15-30 seconds." -ForegroundColor Yellow
+    Write-Host "[OK] SUCCESS: Changes pushed to GitHub origin/$currentBranch!" -ForegroundColor Green
+    Write-Host "[*] Vercel will automatically detect this push and redeploy within 15-30 seconds." -ForegroundColor Yellow
     Write-Host "==========================================================" -ForegroundColor Green
 } catch {
-    Write-Host "`n! Push encountered an issue: $_" -ForegroundColor Red
+    Write-Host "`n! Push encountered an issue: $($_.Exception.Message)" -ForegroundColor Red
     Write-Host "Ensure your GitHub credentials or SSH keys are configured, or check repository permissions." -ForegroundColor Yellow
     exit 1
 }
