@@ -1,75 +1,49 @@
-# Yantra RV64 Documentation Website
+# Yantra RV64 System Documentation
 
-A high-performance technical documentation website for the **Yantra RISC-V 64-bit Emulator** project, styled in a warm **beige, cream, and skin** color palette with a pure frontend architecture (zero backend, zero environment variables).
-
----
-
-## 🎨 Color Palette & Aesthetic
-
-- **Cream**: `#FDFCF7`, `#FAF5EB`, `#F4ECE1` (Parchment surfaces)
-- **Beige**: `#F2EAE0`, `#EEDECF`, `#DEC4AD` (Subtle cards & borders)
-- **Skin & Earth Tones**: `#CCA88B`, `#B88B6E`, `#885A3F`, `#4B2F1F` (Accents, badges, and deep espresso inks)
-- **Terracotta Warm Accent**: `#B9663E` (Interactive elements and active link indicators)
+A technical documentation platform for the **Yantra RISC-V 64-bit Full-System Emulator** (`RV64GC`), designed with a warm editorial aesthetic and zero-dependency static architecture.
 
 ---
 
-## ⚡ Zero-Backend Architecture (Painless Vercel Deployment)
+## ⚡ Overview & Architectural Coverage
 
-- **No Database**: No Prisma, PostgreSQL, Docker, or SQLite required.
-- **No Environment Variables**: No `.env`, secret keys, or API tokens needed on Vercel.
-- **Instant Deployment**: Vercel detects standard static HTML/CSS/JS with `vercel.json` and builds in under 15 seconds.
+This documentation suite details the implementation and hardware mechanics of the 64-bit RISC-V full-system emulator:
+
+- **Module 1**: RV64I Base Integer ISA, general-purpose register state (`x0`–`x31`), hardwired zero mechanics, and immediate sign-extension.
+- **RV64 Register Model**: ABI conventions, caller/callee save constraints, and floating-point registers.
+- **Module 2**: Sv39 Memory Management Unit (MMU), 3-level page table walking, PTE permission flags (`V`, `R`, `W`, `X`, `U`, `A`, `D`), and TLB caching.
+- **Module 3**: Privileged architecture (Machine, Supervisor, User modes), Control & Status Registers (CSRs), trap delegation (`medeleg`/`mideleg`), and trap entry/return flow.
+- **Module 4**: Standard ISA extensions (M integer multiplication/division, A atomics with Load-Reserved/Store-Conditional, F/D single & double floating-point with NaN-boxing, C compressed instructions, Zicsr, and Zifencei).
+- **Module 5**: System peripherals & interrupt controllers (SiFive CLINT timers, SiFive PLIC interrupt routing, UART 16550A serial console, and VirtIO-MMIO block storage).
+- **Devices & Platform**: Peripherals memory map and full Linux 6.8 boot flow with BusyBox shell initialization.
+- **Guides**: C++20 build toolchain setup and compilation.
 
 ---
 
-## 📄 How to Upload Content as You Give the PDF
+## 🎨 Design Philosophy
 
-### Option A: In-Browser Drag & Drop (Instant)
-1. Open the documentation website in your browser.
-2. Click the **"Import PDF"** button in the top navigation bar.
-3. Drag and drop your PDF file.
-4. The client-side PDF engine parses the document, headings, and code.
-5. Click **"Save & Add to Website"** or **"Download .md"**.
+- **Typography**: Editorial layout combining Plus Jakarta Sans for high-legibility headings and JetBrains Mono for assembly and C++20 emulator code.
+- **Formula Rendering**: KaTeX integration for mathematical proofs and address calculation equations.
+- **Interactive Inspector**: Built-in interactive register explorer for real-time inspection of 64-bit register states and reset vectors.
+- **Fast Client-Side Search**: Instant fuzzy full-text search across all specifications via `Ctrl + K`.
 
-### Option B: Automatic Python Ingestion with Git Auto-Push
-Drop your PDF into the `input_pdfs/` folder or run:
+---
+
+## 💻 Local Development
+
+Run with any local static HTTP server:
 
 ```bash
-# Ingest PDF and automatically commit & push to GitHub
-python scripts/import_pdf.py "path/to/your-specification.pdf"
-```
-
-The script will:
-1. Extract text and code using `pypdf`.
-2. Format into clean markdown.
-3. Update `js/docs-data.js` and `docs/`.
-4. Automatically run `git push origin main` so **Vercel** immediately triggers an automatic redeployment!
-
----
-
-## 🚀 One-Command Git Push for Vercel
-
-Whenever you want to push updates:
-
-```powershell
-npm run deploy
-```
-
-Or directly via PowerShell:
-```powershell
-powershell -ExecutionPolicy Bypass -File .\scripts\sync_and_push.ps1 "docs: your custom update note"
-```
-
----
-
-## 💻 Local Preview
-
-Run any local static server or simply open `index.html` in your browser:
-
-```bash
+# Using Node.js
 npm start
-```
-Or with Python:
-```bash
+
+# Or using Python
 python -m http.server 3000
 ```
-Then navigate to: `http://localhost:3000`
+
+Then open `http://localhost:3000` in any modern web browser.
+
+---
+
+## 📄 License
+
+This documentation is released under the [MIT License](LICENSE).

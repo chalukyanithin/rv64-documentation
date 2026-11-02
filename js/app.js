@@ -43,22 +43,8 @@
     { num: 32, name: "pc", saver: "-", desc: "64-bit Program Counter (Reset: 0x80000000)" }
   ];
 
-  // Load custom imported docs from localStorage if any (window.DOCS_DATABASE is always authoritative)
+  // Documentation database (authoritative)
   let docs = window.DOCS_DATABASE ? [...window.DOCS_DATABASE] : [];
-  try {
-    const saved = localStorage.getItem("rv64_custom_docs");
-    if (saved) {
-      const customDocs = JSON.parse(saved);
-      // Remove any custom doc whose id collides with built-in modules to avoid stale overrides
-      const validCustom = customDocs.filter(cd => !docs.some(d => d.id === cd.id));
-      if (validCustom.length !== customDocs.length) {
-        localStorage.setItem("rv64_custom_docs", JSON.stringify(validCustom));
-      }
-      validCustom.forEach(cd => docs.push(cd));
-    }
-  } catch (e) {
-    console.warn("Storage access failed:", e);
-  }
 
   // DOM Elements
   const navContainer = document.getElementById("sidebar-nav");
@@ -73,7 +59,6 @@
   const searchModal = document.getElementById("search-modal");
   const searchInput = document.getElementById("search-input");
   const searchResults = document.getElementById("search-results");
-  const pdfModal = document.getElementById("pdf-modal");
   const toast = document.getElementById("app-toast");
   const sidebarFilter = document.getElementById("sidebar-filter");
 
@@ -640,145 +625,10 @@
     }
     if (e.key === "Escape") {
       closeSearch();
-      closePdfModal();
     }
   });
 
-  // 9. PDF Drag & Drop In-Browser Extractor
-  function openPdfModal() {
-    if (pdfModal) pdfModal.classList.add("open");
-  }
-
-  function closePdfModal() {
-    if (pdfModal) pdfModal.classList.remove("open");
-  }
-
-  const dropzone = document.getElementById("pdf-dropzone");
-  const fileInput = document.getElementById("pdf-file-input");
-  const pdfTitleInput = document.getElementById("pdf-doc-title");
-  const pdfCategoryInput = document.getElementById("pdf-doc-category");
-  const pdfPreview = document.getElementById("pdf-extracted-preview");
-  const btnSaveDoc = document.getElementById("btn-save-pdf-doc");
-  const btnDownloadMd = document.getElementById("btn-download-md");
-
-  let extractedMarkdown = "";
-
-  if (dropzone && fileInput) {
-    dropzone.addEventListener("click", () => fileInput.click());
-    dropzone.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      dropzone.classList.add("drag-over");
-    });
-    dropzone.addEventListener("dragleave", () => dropzone.classList.remove("drag-over"));
-    dropzone.addEventListener("drop", (e) => {
-      e.preventDefault();
-      dropzone.classList.remove("drag-over");
-      if (e.dataTransfer.files.length > 0) {
-        handlePdfFile(e.dataTransfer.files[0]);
-      }
-    });
-    fileInput.addEventListener("change", (e) => {
-      if (e.target.files.length > 0) {
-        handlePdfFile(e.target.files[0]);
-      }
-    });
-  }
-
-  // Pure client-side PDF text extraction using PDF.js
-  async function handlePdfFile(file) {
-    if (!file || file.type !== "application/pdf") {
-      alert("Please upload a valid PDF document.");
-      return;
-    }
-
-    const defaultTitle = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
-    if (pdfTitleInput) pdfTitleInput.value = defaultTitle.charAt(0).toUpperCase() + defaultTitle.slice(1);
-
-    dropzone.innerHTML = `
-      <div class="dropzone-text">Reading & Parsing '${file.name}'...</div>
-      <div class="dropzone-subtext">Extracting technical sections and code...</div>
-    `;
-
-    try {
-      const arrayBuffer = await file.arrayBuffer();
-      // Ensure pdfjsLib is loaded
-      if (window.pdfjsLib) {
-        const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        let fullText = `# ${pdfTitleInput.value}\n\n`;
-        fullText += `> Imported from PDF: \`${file.name}\` (${pdf.numPages} pages)\n\n`;
-
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const textContent = await page.getTextContent();
-          const pageStrings = textContent.items.map(item => item.str).join(" ");
-          if (pageStrings.trim()) {
-            fullText += `## Section ${i}\n\n${pageStrings.trim()}\n\n`;
-          }
-        }
-
-        extractedMarkdown = fullText;
-        if (pdfPreview) pdfPreview.value = extractedMarkdown;
-        dropzone.innerHTML = `
-          <div class="dropzone-text" style="color:var(--accent-terracotta);">✓ Successfully Extracted ${pdf.numPages} Pages</div>
-          <div class="dropzone-subtext">Review the markdown preview below and save.</div>
-        `;
-      } else {
-        // Fallback text generator
-        extractedMarkdown = `# ${pdfTitleInput.value}\n\n> Imported from \`${file.name}\`\n\nContent ready for review.`;
-        if (pdfPreview) pdfPreview.value = extractedMarkdown;
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Could not parse PDF text: " + err.message);
-    }
-  }
-
-  if (btnSaveDoc) {
-    btnSaveDoc.addEventListener("click", () => {
-      const title = (pdfTitleInput ? pdfTitleInput.value : "").trim() || "Imported PDF Doc";
-      const category = (pdfCategoryInput ? pdfCategoryInput.value : "").trim() || "Imported Specifications";
-      const content = pdfPreview ? pdfPreview.value : extractedMarkdown;
-      const id = "doc-" + Date.now();
-
-      const newDoc = {
-        id,
-        title,
-        category,
-        description: `Imported document: ${title}`,
-        content
-      };
-
-      docs.push(newDoc);
-
-      // Persist in localStorage
-      try {
-        const custom = JSON.parse(localStorage.getItem("rv64_custom_docs") || "[]");
-        custom.push(newDoc);
-        localStorage.setItem("rv64_custom_docs", JSON.stringify(custom));
-      } catch (e) {
-        console.warn(e);
-      }
-
-      closePdfModal();
-      loadDoc(id);
-      showToast(`✓ Document added! To push to Git & Vercel, run: npm run deploy`);
-    });
-  }
-
-  if (btnDownloadMd) {
-    btnDownloadMd.addEventListener("click", () => {
-      const content = pdfPreview ? pdfPreview.value : extractedMarkdown;
-      const blob = new Blob([content], { type: "text/markdown" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `${(pdfTitleInput ? pdfTitleInput.value : 'document').toLowerCase().replace(/\s+/g, '-')}.md`;
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-  }
-
-  // 10. Theme Toggle Controller
+  // 9. Theme Toggle Controller
   function initTheme() {
     const savedTheme = localStorage.getItem("rv64_theme") || "light";
     document.documentElement.setAttribute("data-theme", savedTheme);
@@ -793,7 +643,7 @@
     }
   }
 
-  // 11. Initial Startup
+  // 10. Initial Startup
   function init() {
     initTheme();
     initRegisterInspector();
@@ -813,12 +663,6 @@
     // Attach Header search trigger
     const searchBtn = document.getElementById("btn-open-search");
     if (searchBtn) searchBtn.addEventListener("click", openSearch);
-
-    const pdfBtn = document.getElementById("btn-open-pdf");
-    if (pdfBtn) pdfBtn.addEventListener("click", openPdfModal);
-
-    const closePdfBtn = document.getElementById("btn-close-pdf");
-    if (closePdfBtn) closePdfBtn.addEventListener("click", closePdfModal);
 
     const closeSearchBtn = document.getElementById("btn-close-search");
     if (closeSearchBtn) closeSearchBtn.addEventListener("click", closeSearch);

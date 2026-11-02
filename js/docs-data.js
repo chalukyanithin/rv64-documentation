@@ -1148,6 +1148,8 @@ A CPU core alone cannot interact with the physical world. It needs ways to recei
 
 In RISC-V systems, peripherals do not use dedicated port instructions (like x86 \`in\`/\`out\`). Instead, they rely on **Memory-Mapped I/O (MMIO)**. Specific regions of the 64-bit physical address space are assigned to device registers. When the CPU executes a standard \`sd\` (store doubleword) or \`ld\` (load doubleword) targeting an MMIO address, the bus routes the access to the device logic rather than physical DRAM.
 
+![Physical Address Space](assets/images/rv64-physical-address-space.png)
+
 ---
 
 ## 2. Deep Dive into Simulated Peripherals
@@ -1172,6 +1174,8 @@ Routes external hardware interrupts (UART, VirtIO) to the CPU core:
 4. **Claim/Complete Workflow**:
    - **Claim**: The OS reads the Claim register (\`0x0C200004\`). The PLIC returns the ID of the highest-priority pending interrupt and atomically clears the pending bit.
    - **Complete**: After servicing the device, the OS writes the serviced source ID back to the Claim/Complete register to signal readiness for subsequent interrupts.
+
+![PLIC Interrupt Handling Flow](assets/images/plic-interrupt-handling-flow.png)
 
 ---
 
@@ -1388,32 +1392,6 @@ cmake --build build-msvc --config Release -j
 
 > [!IMPORTANT]
 > Always compile in **Release mode** (\`--config Release\`). Emulation throughput increases by over 12x due to inlined instruction decoding.
-`
-  },
-  {
-    id: "pdf-workflow",
-    title: "PDF Ingestion & Vercel Deploy",
-    category: "Guides & Toolchain",
-    description: "How to upload PDF documents and push automatically to Git and Vercel.",
-    content: `# PDF Ingestion & Automatic Vercel Deployment
-
-This documentation system was architected to be **100% frontend**—no database, no backend servers, and **zero environment variables** to configure on Vercel.
-
----
-
-## Method 1: In-Browser Drag & Drop (Instant)
-1. Click the **"Import PDF"** button in the top navigation bar.
-2. Drag and drop any specification PDF.
-3. The built-in client-side engine parses the text and generates clean markdown in real time.
-4. Preview the document and click **"Save & Add to Website"**.
-
----
-
-## Method 2: Python Script with Auto-Push
-\`\`\`bash
-# Run the PDF ingestion tool
-python scripts/import_pdf.py "path/to/specification.pdf"
-\`\`\`
 `
   }
 ];

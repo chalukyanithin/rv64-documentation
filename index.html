@@ -12,14 +12,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
-  <!-- PDF.js for pure client-side PDF extraction (Zero backend needed) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script>
-    if (window.pdfjsLib) {
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    }
-  </script>
-
   <!-- Marked.js for rock-solid GFM parsing (lists, tables, code blocks, bold with backticks) -->
   <script src="js/marked.min.js"></script>
 
@@ -55,12 +47,6 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         <span>Search documentation...</span>
         <span class="kbd-shortcut">Ctrl K</span>
-      </button>
-
-      <!-- Import PDF Button -->
-      <button class="btn btn-primary" id="btn-open-pdf" title="Import specifications from PDF">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-        <span>Import PDF</span>
       </button>
 
       <!-- Theme Switcher -->
@@ -129,75 +115,8 @@
         </div>
       </div>
 
-      <!-- Zero-Config Vercel Deploy Widget -->
-      <div class="inspector-card" style="background-color: var(--surface-card);">
-        <div class="inspector-header">
-          <span class="inspector-title">Deployment Status</span>
-          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background-color:#48BB78;" title="Ready"></span>
-        </div>
-        <p style="font-size:0.8rem;color:var(--text-secondary);margin-bottom:0.75rem;">
-          Pure static frontend with zero backend dependencies. 100% ready for instant Vercel pulls.
-        </p>
-        <button class="btn btn-secondary" style="width:100%;font-size:0.78rem;justify-content:center;" onclick="window.appShowToast('Run: npm run deploy in terminal to push to Git!')">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>
-          Push to Vercel
-        </button>
-      </div>
     </aside>
 
-  </div>
-
-  <!-- PDF Importer Modal -->
-  <div class="modal-backdrop" id="pdf-modal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <h3 class="modal-title">Import PDF to Documentation</h3>
-        <button class="btn-icon" id="btn-close-pdf" style="width:32px;height:32px;">✕</button>
-      </div>
-      <div class="modal-body">
-        <!-- Dropzone -->
-        <div class="dropzone" id="pdf-dropzone">
-          <svg class="dropzone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-            <polyline points="17 8 12 3 7 8"></polyline>
-            <line x1="12" y1="3" x2="12" y2="15"></line>
-          </svg>
-          <div class="dropzone-text">Click or drag & drop your PDF file here</div>
-          <div class="dropzone-subtext">Parses technical specifications, chapters, and assembly code into clean Markdown</div>
-          <input type="file" id="pdf-file-input" accept="application/pdf" style="display:none;">
-        </div>
-
-        <!-- Meta Inputs -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.25rem 0 0.75rem;">
-          <div>
-            <label style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:0.35rem;">Document Title</label>
-            <input type="text" id="pdf-doc-title" class="sidebar-filter-input" placeholder="e.g. RISC-V Privileged Architecture">
-          </div>
-          <div>
-            <label style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:0.35rem;">Category</label>
-            <input type="text" id="pdf-doc-category" class="sidebar-filter-input" value="Imported Specifications">
-          </div>
-        </div>
-
-        <!-- Live Preview Textarea -->
-        <div style="margin-top:1rem;">
-          <label style="font-size:0.8rem;font-weight:700;color:var(--text-secondary);display:block;margin-bottom:0.35rem;">Extracted Markdown Preview</label>
-          <textarea id="pdf-extracted-preview" rows="8" class="sidebar-filter-input" style="font-family:'JetBrains Mono',monospace;font-size:0.82rem;resize:vertical;" placeholder="Extracted text and markdown content will appear here..."></textarea>
-        </div>
-
-        <!-- Action Buttons -->
-        <div style="display:flex;justify-content:flex-end;gap:0.75rem;margin-top:1.25rem;">
-          <button class="btn btn-secondary" id="btn-download-md">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-            Download .md
-          </button>
-          <button class="btn btn-primary" id="btn-save-pdf-doc">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
-            Save & Add to Website
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- Search Modal -->
